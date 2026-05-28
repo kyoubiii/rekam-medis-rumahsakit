@@ -1,0 +1,124 @@
+Organizations:
+  - &OrdererOrg
+    Name: OrdererOrg
+    ID: OrdererMSP
+    MSPDir: crypto-config/ordererOrganizations/mednet.com/msp
+    Policies:
+        Readers: {Type: Signature, Rule: "OR('OrdererMSP.member')"}
+        Writers: {Type: Signature, Rule: "OR('OrdererMSP.member')"}
+        Admins:  {Type: Signature, Rule: "OR('OrdererMSP.admin')"}
+
+  - &RSWelasAsih
+    Name: RSWelasAsihMSP
+    ID: RSWelasAsihMSP
+    MSPDir: crypto-config/peerOrganizations/welasasih.mednet.com/msp
+    Policies:
+        Readers: {Type: Signature, Rule: "OR('RSWelasAsihMSP.admin', 'RSWelasAsihMSP.peer', 'RSWelasAsihMSP.client')"}
+        Writers: {Type: Signature, Rule: "OR('RSWelasAsihMSP.admin', 'RSWelasAsihMSP.client')"}
+        Admins:  {Type: Signature, Rule: "OR('RSWelasAsihMSP.admin')"}
+        Endorsement: {Type: Signature, Rule: "OR('RSWelasAsihMSP.peer')"}
+
+  - &RSMuhammadiyah
+    Name: RSMuhammadiyahMSP
+    ID: RSMuhammadiyahMSP
+    MSPDir: crypto-config/peerOrganizations/muhammadiyah.mednet.com/msp
+    Policies:
+        Readers: {Type: Signature, Rule: "OR('RSMuhammadiyahMSP.admin', 'RSMuhammadiyahMSP.peer', 'RSMuhammadiyahMSP.client')"}
+        Writers: {Type: Signature, Rule: "OR('RSMuhammadiyahMSP.admin', 'RSMuhammadiyahMSP.client')"}
+        Admins:  {Type: Signature, Rule: "OR('RSMuhammadiyahMSP.admin')"}
+        Endorsement: {Type: Signature, Rule: "OR('RSMuhammadiyahMSP.peer')"}
+
+Capabilities:
+  Channel: &ChannelCapabilities { V2_0: true }
+  Orderer: &OrdererCapabilities { V2_0: true }
+  Application: &ApplicationCapabilities { V2_0: true }
+
+# INI BAGIAN YANG KETINGGALAN SEBELUMNYA
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  Capabilities:
+    <<: *ChannelCapabilities
+
+Application: &ApplicationDefaults
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+
+Orderer: &OrdererDefaults
+  OrdererType: etcdraft
+  Addresses:
+    - orderer.mednet.com:7050
+  EtcdRaft:
+    Consenters:
+      - Host: orderer.mednet.com
+        Port: 7050
+        ClientTLSCert: crypto-config/ordererOrganizations/mednet.com/orderers/orderer.mednet.com/tls/server.crt
+        ServerTLSCert: crypto-config/ordererOrganizations/mednet.com/orderers/orderer.mednet.com/tls/server.crt
+  BatchTimeout: 2s
+  BatchSize:
+    MaxMessageCount: 10
+    AbsoluteMaxBytes: 99 MB
+    PreferredMaxBytes: 512 KB
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+
+Profiles:
+  KonsorsiumMedisGenesis:
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *OrdererOrg
+      Capabilities:
+        <<: *OrdererCapabilities
+    Consortiums:
+      MedisConsortium:
+        Organizations:
+          - *RSWelasAsih
+          - *RSMuhammadiyah
+          
+  MedisChannel:
+    Consortium: MedisConsortium
+    <<: *ChannelDefaults
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *RSWelasAsih
+        - *RSMuhammadiyah
+      Capabilities:
+        <<: *ApplicationCapabilities

@@ -1,0 +1,23 @@
+OrdererOrgs:
+  - Name: Orderer
+    Domain: mednet.com
+    EnableNodeOUs: true
+    Specs:
+      - Hostname: orderer
+
+PeerOrgs:
+  - Name: RSWelasAsih
+    Domain: welasasih.mednet.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1 # Ini akan membuat peer0.welasasih.mednet.com
+    Users:
+      Count: 1 # Ini akan membuat 1 user admin untuk RS Welas Asih
+
+  - Name: RSMuhammadiyah
+    Domain: muhammadiyah.mednet.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1 # Ini akan membuat peer0.muhammadiyah.mednet.com
+    Users:
+      Count: 1 # Ini akan membuat 1 user admin untuk RS Muhammadiyah

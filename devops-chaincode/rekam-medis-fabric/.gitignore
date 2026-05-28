@@ -1,0 +1,17 @@
+# Abaikan folder KTP dan Kunci Kriptografi
+crypto-config/
+
+# Abaikan blok fisik dan artefak channel
+channel-artifacts/
+*.block
+*.tx
+
+# Abaikan bungkusan Chaincode
+*.tar.gz
+
+# Abaikan folder node_modules atau vendor jika ada
+node_modules/
+vendor/
+
+# Abaikan file environment/rahasia
+.env

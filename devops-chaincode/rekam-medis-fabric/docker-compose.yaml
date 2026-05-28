@@ -1,0 +1,136 @@
+version: '3'
+
+networks:
+  mednet_network:
+    name: mednet_network
+
+services:
+  # 1. DATABASE UNTUK RS WELAS ASIH
+  couchdb0:
+    container_name: couchdb0
+    image: couchdb:3.3.3
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=adminpw
+    ports:
+      - "5984:5984"
+    networks:
+      - mednet_network
+
+  # 2. DATABASE UNTUK RS MUHAMMADIYAH
+  couchdb1:
+    container_name: couchdb1
+    image: couchdb:3.3.3
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=adminpw
+    ports:
+      - "7984:5984"
+    networks:
+      - mednet_network
+
+  # 3. MESIN ORDERER UTAMA
+# 3. MESIN ORDERER UTAMA
+  orderer.mednet.com:
+    container_name: orderer.mednet.com
+    image: hyperledger/fabric-orderer:2.5.4
+    environment:
+      - FABRIC_LOGGING_SPEC=INFO
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_LISTENPORT=7050
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=/var/hyperledger/orderer/tls/ca.crt
+      - ORDERER_GENERAL_BOOTSTRAPMETHOD=file
+      - ORDERER_GENERAL_BOOTSTRAPFILE=/var/hyperledger/orderer/genesis.block
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - ./channel-artifacts/genesis.block:/var/hyperledger/orderer/genesis.block
+      - ./crypto-config/ordererOrganizations/mednet.com/orderers/orderer.mednet.com/msp:/var/hyperledger/orderer/msp
+      - ./crypto-config/ordererOrganizations/mednet.com/orderers/orderer.mednet.com/tls:/var/hyperledger/orderer/tls
+    ports:
+      - "7050:7050"
+    networks:
+      - mednet_network
+
+  # 4. PEER NODE RS WELAS ASIH
+  peer0.welasasih.mednet.com:
+    container_name: peer0.welasasih.mednet.com
+    image: hyperledger/fabric-peer:2.5.4
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=mednet_network
+      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_PROFILE_ENABLED=false
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      - CORE_PEER_ID=peer0.welasasih.mednet.com
+      - CORE_PEER_ADDRESS=peer0.welasasih.mednet.com:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.welasasih.mednet.com:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.welasasih.mednet.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.welasasih.mednet.com:7051
+      - CORE_PEER_LOCALMSPID=RSWelasAsihMSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ./crypto-config/peerOrganizations/welasasih.mednet.com/peers/peer0.welasasih.mednet.com/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/welasasih.mednet.com/peers/peer0.welasasih.mednet.com/tls:/etc/hyperledger/fabric/tls
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    ports:
+      - "7051:7051"
+    networks:
+      - mednet_network
+    depends_on:
+      - couchdb0
+
+  # 5. PEER NODE RS MUHAMMADIYAH
+  peer0.muhammadiyah.mednet.com:
+    container_name: peer0.muhammadiyah.mednet.com
+    image: hyperledger/fabric-peer:2.5.4
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=mednet_network
+      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_PROFILE_ENABLED=false
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      - CORE_PEER_ID=peer0.muhammadiyah.mednet.com
+      - CORE_PEER_ADDRESS=peer0.muhammadiyah.mednet.com:9051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:9051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.muhammadiyah.mednet.com:9052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:9052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.muhammadiyah.mednet.com:9051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.muhammadiyah.mednet.com:9051
+      - CORE_PEER_LOCALMSPID=RSMuhammadiyahMSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb1:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ./crypto-config/peerOrganizations/muhammadiyah.mednet.com/peers/peer0.muhammadiyah.mednet.com/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/muhammadiyah.mednet.com/peers/peer0.muhammadiyah.mednet.com/tls:/etc/hyperledger/fabric/tls
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    ports:
+      - "9051:9051"
+    networks:
+      - mednet_network
+    depends_on:
+      - couchdb1
