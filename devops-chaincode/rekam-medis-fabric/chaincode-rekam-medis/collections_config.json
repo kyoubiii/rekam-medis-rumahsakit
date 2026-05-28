@@ -1,0 +1,20 @@
+[
+  {
+    "name": "CollectionTagihanWelasAsih",
+    "policy": "OR('RSWelasAsihMSP.peer')",
+    "requiredPeerCount": 0,
+    "maxPeerCount": 3,
+    "blockToLive": 0,
+    "memberOnlyRead": true,
+    "memberOnlyWrite": true
+  },
+  {
+    "name": "CollectionTagihanMuhammadiyah",
+    "policy": "OR('RSMuhammadiyahMSP.peer')",
+    "requiredPeerCount": 0,
+    "maxPeerCount": 3,
+    "blockToLive": 0,
+    "memberOnlyRead": true,
+    "memberOnlyWrite": true
+  }
+]
