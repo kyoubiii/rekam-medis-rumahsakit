@@ -69,6 +69,37 @@ func (s *SmartContract) ReadRekamMedis(ctx contractapi.TransactionContextInterfa
 	return &rm, nil
 }
 
+// --- FUNGSI GET ALL (RICH QUERY COUCHDB) ---
+
+// GetAllRekamMedis menggunakan Rich Query CouchDB untuk mengambil semua data pasien
+func (s *SmartContract) GetAllRekamMedis(ctx contractapi.TransactionContextInterface) ([]*RekamMedis, error) {
+	// Kita mencari semua dokumen di state database yang field "idPasien"-nya tidak kosong.
+	queryString := `{"selector":{"idPasien":{"$ne":""}}}`
+
+	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
+	if err != nil {
+		return nil, err
+	}
+	defer resultsIterator.Close()
+
+	var pasienList []*RekamMedis
+	for resultsIterator.HasNext() {
+		queryResponse, err := resultsIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+
+		var pasien RekamMedis
+		err = json.Unmarshal(queryResponse.Value, &pasien)
+		if err != nil {
+			return nil, err
+		}
+		pasienList = append(pasienList, &pasien)
+	}
+
+	return pasienList, nil
+}
+
 // --- FUNGSI TRANSFER ASSET (RUJUK PASIEN) ---
 
 func (s *SmartContract) RujukPasien(ctx contractapi.TransactionContextInterface, idPasien string, rsTujuan string) error {

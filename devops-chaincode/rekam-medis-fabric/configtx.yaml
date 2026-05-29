@@ -17,6 +17,9 @@ Organizations:
         Writers: {Type: Signature, Rule: "OR('RSWelasAsihMSP.admin', 'RSWelasAsihMSP.client')"}
         Admins:  {Type: Signature, Rule: "OR('RSWelasAsihMSP.admin')"}
         Endorsement: {Type: Signature, Rule: "OR('RSWelasAsihMSP.peer')"}
+    AnchorPeers:
+      - Host: peer0.welasasih.mednet.com
+        Port: 7051
 
   - &RSMuhammadiyah
     Name: RSMuhammadiyahMSP
@@ -27,7 +30,10 @@ Organizations:
         Writers: {Type: Signature, Rule: "OR('RSMuhammadiyahMSP.admin', 'RSMuhammadiyahMSP.client')"}
         Admins:  {Type: Signature, Rule: "OR('RSMuhammadiyahMSP.admin')"}
         Endorsement: {Type: Signature, Rule: "OR('RSMuhammadiyahMSP.peer')"}
-
+    AnchorPeers:
+      - Host: peer0.muhammadiyah.mednet.com
+        Port: 9051
+        
 Capabilities:
   Channel: &ChannelCapabilities { V2_0: true }
   Orderer: &OrdererCapabilities { V2_0: true }

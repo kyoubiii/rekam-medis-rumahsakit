@@ -1,7 +1,7 @@
 [
   {
     "name": "CollectionTagihanWelasAsih",
-    "policy": "OR('RSWelasAsihMSP.peer')",
+    "policy": "OR('RSWelasAsihMSP.member')",
     "requiredPeerCount": 0,
     "maxPeerCount": 3,
     "blockToLive": 0,
@@ -10,7 +10,7 @@
   },
   {
     "name": "CollectionTagihanMuhammadiyah",
-    "policy": "OR('RSMuhammadiyahMSP.peer')",
+    "policy": "OR('RSMuhammadiyahMSP.member')",
     "requiredPeerCount": 0,
     "maxPeerCount": 3,
     "blockToLive": 0,
