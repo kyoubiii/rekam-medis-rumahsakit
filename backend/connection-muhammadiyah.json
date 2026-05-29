@@ -1,0 +1,28 @@
+{
+    "name": "muhammadiyah-network",
+    "version": "1.0.0",
+    "client": {
+        "organization": "RSMuhammadiyah",
+        "connection": {
+            "timeout": { "peer": { "endorser": "300" } }
+        }
+    },
+    "organizations": {
+        "RSMuhammadiyah": {
+            "mspid": "RSMuhammadiyahMSP",
+            "peers": [ "peer0.muhammadiyah.mednet.com" ]
+        }
+    },
+    "peers": {
+        "peer0.muhammadiyah.mednet.com": {
+            "url": "grpcs://localhost:9051",
+            "tlsCACerts": {
+                "path": "./crypto-config/peerOrganizations/muhammadiyah.mednet.com/peers/peer0.muhammadiyah.mednet.com/tls/ca.crt"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "peer0.muhammadiyah.mednet.com",
+                "hostnameOverride": "peer0.muhammadiyah.mednet.com"
+            }
+        }
+    }
+}

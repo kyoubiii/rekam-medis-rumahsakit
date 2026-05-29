@@ -1,0 +1,28 @@
+{
+    "name": "welasasih-network",
+    "version": "1.0.0",
+    "client": {
+        "organization": "RSWelasAsih",
+        "connection": {
+            "timeout": { "peer": { "endorser": "300" } }
+        }
+    },
+    "organizations": {
+        "RSWelasAsih": {
+            "mspid": "RSWelasAsihMSP",
+            "peers": [ "peer0.welasasih.mednet.com" ]
+        }
+    },
+    "peers": {
+        "peer0.welasasih.mednet.com": {
+            "url": "grpcs://localhost:7051",
+            "tlsCACerts": {
+                "path": "./crypto-config/peerOrganizations/welasasih.mednet.com/peers/peer0.welasasih.mednet.com/tls/ca.crt"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "peer0.welasasih.mednet.com",
+                "hostnameOverride": "peer0.welasasih.mednet.com"
+            }
+        }
+    }
+}
