@@ -1,83 +1,74 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
+import { BASE_URL } from '../constants/api';
 
 export default function TambahPasien({ currentRS, onAddPasien }) {
-  const [id, setId] = useState("RM-00" + Math.floor(Math.random() * 100));
-  const [nama, setNama] = useState("");
-  const [diagnosa, setDiagnosa] = useState("");
-  const [tindakan, setTindakan] = useState("");
+  const [formData, setFormData] = useState({ idPasien: '', namaPasien: '', riwayatSakit: '', tindakan: '' });
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nama || !diagnosa) return alert("Nama dan Diagnosa wajib diisi!");
-
-    const newPasien = {
-      id,
-      nama,
-      diagnosa,
-      tindakan,
-      pemilik: currentRS,
-      riwayat: [
-        {
-          waktu: "10:00 WIB",
-          info: `Pasien ${id} didaftarkan pertama kali di ${currentRS}.`,
-        },
-      ],
-    };
-
-    onAddPasien(newPasien);
-    alert("Data Berhasil Ditambahkan ke Ledger Blockchain (Simulasi)!");
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${BASE_URL}/rekam-medis`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          idPasien: formData.idPasien,
+          namaPasien: formData.namaPasien,
+          riwayatSakit: formData.riwayatSakit,
+          tindakan: formData.tindakan,
+          pemilik: currentRS
+        })
+      });
+      const result = await response.json();
+      if (response.ok) {
+        alert('✅ Berhasil disimpan ke Blockchain!');
+        // Update local state untuk tabel Dashboard
+        onAddPasien({ 
+            id: formData.idPasien, 
+            nama: formData.namaPasien, 
+            diagnosa: formData.riwayatSakit, // Disamakan dengan key di tabel dashboard
+            tindakan: formData.tindakan,
+            pemilik: currentRS, 
+            riwayat: [{ waktu: 'Baru saja', info: `Didaftarkan oleh ${currentRS}` }] 
+        });
+        setFormData({ idPasien: '', namaPasien: '', riwayatSakit: '', tindakan: '' });
+      } else {
+        alert('❌ Gagal: ' + result.error);
+      }
+    } catch (error) {
+      alert('Error koneksi ke Backend');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="card" style={{ maxWidth: "600px", margin: "0 auto" }}>
+    <div className="card">
       <h3>Tambah Rekam Medis Baru (CreateAsset)</h3>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>ID Pasien</label>
-          <input
-            type="text"
-            value={id}
-            onChange={(e) => setId(e.target.value)}
-          />
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px' }}>
+        <div>
+            <label style={{ fontWeight: 'bold' }}>ID Pasien</label>
+            <input type="text" placeholder="Misal: RM-006" value={formData.idPasien} onChange={e => setFormData({...formData, idPasien: e.target.value})} required style={{ width: '100%', padding: '10px', marginTop: '5px' }} />
         </div>
-        <div className="form-group">
-          <label>Nama Pasien</label>
-          <input
-            type="text"
-            placeholder="Nama Lengkap"
-            value={nama}
-            onChange={(e) => setNama(e.target.value)}
-          />
+        <div>
+            <label style={{ fontWeight: 'bold' }}>Nama Lengkap</label>
+            <input type="text" placeholder="Nama Pasien" value={formData.namaPasien} onChange={e => setFormData({...formData, namaPasien: e.target.value})} required style={{ width: '100%', padding: '10px', marginTop: '5px' }} />
         </div>
-        <div className="form-group">
-          <label>Penyakit / Diagnosa</label>
-          <input
-            type="text"
-            placeholder="Misal: Gastritis Akut"
-            value={diagnosa}
-            onChange={(e) => setDiagnosa(e.target.value)}
-          />
+        <div>
+            <label style={{ fontWeight: 'bold' }}>Riwayat Sakit</label>
+            <input type="text" placeholder="Misal: Tipes" value={formData.riwayatSakit} onChange={e => setFormData({...formData, riwayatSakit: e.target.value})} required style={{ width: '100%', padding: '10px', marginTop: '5px' }} />
         </div>
-        <div className="form-group">
-          <label>Tindakan</label>
-          <input
-            type="text"
-            placeholder="Misal: Pemberian Antasida"
-            value={tindakan}
-            onChange={(e) => setTindakan(e.target.value)}
-          />
+        <div>
+            <label style={{ fontWeight: 'bold' }}>Tindakan Medis</label>
+            <input type="text" placeholder="Misal: Pemberian Antibiotik" value={formData.tindakan} onChange={e => setFormData({...formData, tindakan: e.target.value})} required style={{ width: '100%', padding: '10px', marginTop: '5px' }} />
         </div>
-        <div className="form-group">
-          <label>Pemilik (Otomatis Sesuai Login)</label>
-          <input
-            type="text"
-            value={currentRS}
-            disabled
-            style={{ background: "#cbd5e1", fontWeight: "bold" }}
-          />
+        <div>
+            <label style={{ fontWeight: 'bold' }}>Pemilik (Otomatis Sesuai Login)</label>
+            <input type="text" value={currentRS} disabled style={{ width: '100%', padding: '10px', marginTop: '5px', backgroundColor: '#e2e8f0' }} />
         </div>
-        <button type="submit" className="btn" style={{ width: "100%" }}>
-          Simpan ke Blockchain
+        <button type="submit" className="btn btn-primary" disabled={isLoading}>
+            {isLoading ? "Menyimpan ke Ledger..." : "Simpan ke Blockchain"}
         </button>
       </form>
     </div>
